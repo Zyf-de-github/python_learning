@@ -174,5 +174,27 @@ from collections import deque
 # stack1=[[3*x,x**2] for x in stack1]
 # print(stack1)
 
-import support
-support.support()
+# import support
+# # support.support()
+#
+# def print_location():
+#     print(f"模块的 __name__ 值: {__name__}")
+#
+#
+# if(__name__=="__main__"):
+#     # print("the main is running")
+#     # support.hello()
+#     support.print_location()
+#     print_location()
+# else:
+#     print("the main is not running, the support is running")
+
+
+
+x = 6
+if x > 5:
+    raise Exception('x 不能大于 5。x 的值为: {}'.format(x))
+
+
+
+
