@@ -191,10 +191,27 @@ from collections import deque
 
 
 
-x = 6
-if x > 5:
-    raise Exception('x 不能大于 5。x 的值为: {}'.format(x))
+# x = 6
+# if x > 5:
+#     raise Exception('x 不能大于 5。x 的值为: {}'.format(x))
 
 
 
+
+
+
+
+
+num = 1
+
+
+def fun1():
+    global num  # 需要使用 global 关键字声明
+    # print(num)
+    num = 123
+    # print(num)
+
+print(num)
+fun1()
+print(num)
 

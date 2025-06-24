@@ -110,17 +110,17 @@
 # print(lcm(1,7))
 
 
-def add(a,b):
-    return a+b
-
-def subtract(a,b):
-    return a-b
-
-def multiply(a,b):
-    return a*b
-
-def divide(a,b):
-    return a/b
+# def add(a,b):
+#     return a+b
+#
+# def subtract(a,b):
+#     return a-b
+#
+# def multiply(a,b):
+#     return a*b
+#
+# def divide(a,b):
+#     return a/b
 
 
 # while True:
@@ -174,6 +174,41 @@ def divide(a,b):
 # print(fibo(0))
 
 
+# class Animal:
+#     def eat(self):
+#         print("人吃饭")
+#
+# class Dog(Animal):
+#     def eat(self):
+#         print("狗吃屎")
+#
+# class Cat(Animal):
+#     def eat(self):
+#         print("猫吃鱼")
+#
+# def eating(animal):
+#     animal.eat()
+#
+# people=Animal()
+# dog = Dog()
+# cat = Cat()
+# eating(people)
+# eating(dog)
+# eating(cat)
 
 
 
+#生成器函数
+def gen():
+    yield 'a'
+    yield 'b'
+    yield 'c'
+
+if(__name__ == '__main__'):
+    gen=gen()
+    print(gen)
+    print(gen)
+    print(gen)
+    print(next(gen))
+    print(next(gen))
+    print(next(gen))
