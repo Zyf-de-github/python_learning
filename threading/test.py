@@ -159,27 +159,34 @@ import queue
 #     # print('item is ',item)
 
 
-def tesk1():
-    yield 'hhh'
-    yield 'hahaha'
+# def tesk1():
+#     yield 'hhh'
+#     yield 'hahaha'
+#
+# def tesk2():
+#     yield 'bbb'
+#     yield 'bababa'
+#
+# def tesk3():
+#     while True:
+#         yield 'bks'
+#         yield 'aks'
+#
+# if __name__ == '__main__':
+#     t1=tesk1()
+#     t2=tesk2()
+#     t3=tesk3()
+#     print(next(t1))
+#     print(next(t2))
+#     print(next(t1))
+#     print(next(t2))
+#     while True:
+#         print(next(t3))
+#         time.sleep(1)
 
-def tesk2():
-    yield 'bbb'
-    yield 'bababa'
 
-def tesk3():
-    while True:
-        yield 'bks'
-        yield 'aks'
 
-if __name__ == '__main__':
-    t1=tesk1()
-    t2=tesk2()
-    t3=tesk3()
-    print(next(t1))
-    print(next(t2))
-    print(next(t1))
-    print(next(t2))
-    while True:
-        print(next(t3))
-        time.sleep(1)
+#gevent   自动切换协程  耗时操作
+#monkey补丁
+
+#greenlet   手动切换协程
