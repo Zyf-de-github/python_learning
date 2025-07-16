@@ -20,7 +20,8 @@ class Calculator2(QMainWindow, Ui_Form2):
         self.b_return.clicked.connect(self.return_main)
 
     def return_main(self):
-        if self.parent():
-            self.parent().show()
+        # if self.parent():
+        #     self.parent().show()
+        self.parent_window.show()
         self.close()
 

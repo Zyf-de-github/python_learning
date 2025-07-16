@@ -5,7 +5,7 @@ from window2 import Calculator2
 
 class Calculator(QMainWindow, Ui_Form):
     def __init__(self):
-        super().__init__()
+        super().__init__()#调用父类（这里是 QMainWindow）的构造方法
         self.setupUi(self)
         self.initUI()
 
@@ -49,7 +49,7 @@ class Calculator(QMainWindow, Ui_Form):
     def open_new_window(self):
         self.temp = Calculator2(self)  # ✅ 保留引用防止被销毁
         self.temp.show()  # ✅ 正确显示新窗口
-        self.hide()  # 可选：隐藏主窗口
+        #self.hide()  # 可选：隐藏主窗口
 
 
 if __name__ == "__main__":
