@@ -81,36 +81,121 @@
 #         return ''.join(final)
 
 
+# class Solution:
+#     def minimumDifference(self, nums: list[int]) -> int:
+#         import heapq
+#         MaxHeap = []
+#         MinHeap = []
+#         left = [0] *((len(nums) // 3)+1)
+#         right = [0] *((len(nums) // 3)+1)
+#         x = 0
+#         for i in range(len(nums) // 3 * 2):
+#             heapq.heappush(MaxHeap, -nums[i])
+#             if len(MaxHeap) > len(nums) // 3:
+#                 heapq.heappop(MaxHeap)
+#             if len(MaxHeap) == len(nums) // 3:
+#                 left[x] = -sum(MaxHeap)
+#                 x += 1
+#         x = len(nums) // 3
+#         for i in range(len(nums) - 1, len(nums) // 3 - 1, -1):
+#             heapq.heappush(MinHeap, nums[i])
+#             if len(MinHeap) > len(nums) // 3:
+#                 heapq.heappop(MinHeap)  # 弹出负数等于减去原最大数
+#             if len(MinHeap) == len(nums) // 3:
+#                 right[x] = sum(MinHeap)
+#                 x -= 1
+#         resault = 100000
+#         for i in range(len(left)):
+#             if left[i] - right[i] < resault:
+#                 resault = left[i] - right[i]
+#         return resault
+
+
+
+
+
+# from typing import Optional
+#
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+#
+# def list_to_linkedlist(lst):
+#     dummy = ListNode(0)
+#     cur = dummy
+#     for val in lst:
+#         cur.next = ListNode(val)
+#         cur = cur.next
+#     return dummy.next
+#
+# def linkedlist_to_list(node):
+#     res = []
+#     while node:
+#         res.append(node.val)
+#         node = node.next
+#     return res
+#
+# class Solution:
+#     def deleteDuplicates(self, head: Optional[ListNode]) -> Optional[ListNode]:
+#         temp=ListNode(0)
+#         mid=ListNode(0)
+#         result=ListNode(0)
+#         mid.next=head
+#         temp.next=head
+#         result.next=mid
+#         NumList=[]
+#         ReNumList=[]
+#         while head!=None:
+#             if head.val not in NumList:
+#                 NumList.append(head.val)
+#             else:
+#                 if head.val not in ReNumList:
+#                     ReNumList.append(head.val)
+#             head=head.next
+#         while temp.next!=None:
+#             while temp.next!=None and temp.next.val in ReNumList:
+#                 temp=temp.next
+#             mid.next=temp.next
+#             mid=mid.next
+#             temp=temp.next
+#         return result.next.next
+
+
+
 class Solution:
-    def minimumDifference(self, nums: list[int]) -> int:
-        import heapq
-        MaxHeap = []
-        MinHeap = []
-        left = [0] *((len(nums) // 3)+1)
-        right = [0] *((len(nums) // 3)+1)
-        x = 0
-        for i in range(len(nums) // 3 * 2):
-            heapq.heappush(MaxHeap, -nums[i])
-            if len(MaxHeap) > len(nums) // 3:
-                heapq.heappop(MaxHeap)
-            if len(MaxHeap) == len(nums) // 3:
-                left[x] = -sum(MaxHeap)
-                x += 1
-        x = len(nums) // 3
-        for i in range(len(nums) - 1, len(nums) // 3 - 1, -1):
-            heapq.heappush(MinHeap, nums[i])
-            if len(MinHeap) > len(nums) // 3:
-                heapq.heappop(MinHeap)  # 弹出负数等于减去原最大数
-            if len(MinHeap) == len(nums) // 3:
-                right[x] = sum(MinHeap)
-                x -= 1
-        resault = 100000
-        for i in range(len(left)):
-            if left[i] - right[i] < resault:
-                resault = left[i] - right[i]
-        return resault
+    def fourSum(self, nums: list[int], target: int) -> list[list[int]]:
+        result=[]
+        nums.sort()
+        for i in range(len(nums)-3):
+            if i > 0 and nums[i] == nums[i - 1]:
+                continue
+            for j in range(i+1,len(nums)-2):
+                if j > i + 1 and nums[j] == nums[j - 1]:
+                    continue
+                left=j+1
+                right=len(nums)-1
+                while left<right:
+                    if nums[i]+nums[j]+nums[left]+nums[right]>target:
+                        while left<right and nums[right]==nums[right-1]:
+                            right-=1
+                        right-=1
+                    elif nums[i]+nums[j]+nums[left]+nums[right]<target:
+                        while left<right and nums[left]==nums[left+1]:
+                            left+=1
+                        left+=1
+                    else:
+                        result.append([nums[i],nums[j],nums[left],nums[right]])
+                        right-=1
+                        left+=1
+        return result
 
 
 if __name__ == '__main__':
-    s=[50,92,65,812,689,105,905,702,721,600,566,598,868,682,985,786,953,71,559,406,521,711,831,955,865,627,812,183,502,297,97,845,313,778,781,454,237,79,442,31,428,15,510,454,207,564,300,857,7,175,260,127,364,465,660,49,636,786,884,139,555,517,535,986,485,998,754,146,921,241,830,244,77,518,915,278,535,237,723,388,1,718,789,27,989,210,7,666,233,705,897,917,470,43,699,693,424,578,959,446,533,669,101,212,56,557,279,559,68,398,93,915,552,13,524,881,164,317,770,632,63,132,798,898,507,339,552,932,305,837,283,230,36,360,977,328,825,442,777,233,87,538,786,573,723,611,911,96,492,8,161,448,604,759,249,9]
-    print(Solution().minimumDifference(s))
+    test_list = [-2,-1,-1,1,1,2,2]
+    test=Solution().fourSum(test_list,0)
+    # print("原始列表:", test_list)
+    # head = list_to_linkedlist(test_list)
+    # new_head = Solution().deleteDuplicates(head)
+    # result_list = linkedlist_to_list(new_head)
+    # print("去重后结果:", result_list)
