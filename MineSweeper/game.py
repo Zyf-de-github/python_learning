@@ -10,22 +10,25 @@ class GameWindow(QWidget):
         super().__init__()
         self.ui = Ui_Form()
         self.ui.setupUi(self)
+        self.setWindowTitle("扫雷游戏——zyf")  # 改窗口标题
         self.first_flag = True#判断是否是开局第一次点击
         self.enable_flag = True  # 用于判断是否可以点击
 
+        #初始化定时器记录游戏时间
         self.elapsed_time = 0
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_timer)
         self.ui.label_2.setText("时间：0秒")
 
+        #初始化参数配置
         self.rows = rows
         self.cols = cols
         self.mine_count = mines
         self.level = level
-
         self.name = name
         self.buttons = [[None for _ in range(self.cols)] for _ in range(self.rows)]
         self.total_cells = self.rows * self.cols -self.mine_count
+
         # 在 Qt Designer 的 gridLayout 里批量添加按钮
         for r in range(self.rows):
             for c in range(self.cols):
@@ -36,7 +39,7 @@ class GameWindow(QWidget):
                 self.ui.gridLayout.addWidget(btn, r, c)
                 self.buttons[r][c].setStyleSheet("background-color: #d3d3d3; color: black;")
 
-
+    #游戏主要逻辑
     def start_game(self, first_r, first_c):
         self.mine_nums = [[0] * self.cols for _ in range(self.rows)]
         # 排除第一次点击格子及周围8格
@@ -53,6 +56,7 @@ class GameWindow(QWidget):
         self.elapsed_time += 1
         self.ui.label_2.setText(f"时间：{self.elapsed_time}秒")
 
+    #点击位置逻辑，包括递归点击周围格子，并判断是否游戏结束，记录时间等
     def on_click(self, r, c):
         if not self.enable_flag:
             return
@@ -91,6 +95,7 @@ class GameWindow(QWidget):
             self.timer.stop()
             self.save_score()
 
+    # 保存成绩函数
     def save_score(self):
         # 难度为0不记录
         if self.level == 0:

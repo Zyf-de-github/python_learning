@@ -1,29 +1,29 @@
-# main.py
 import sys
 from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QMessageBox
-from PyQt5 import uic, QtGui
-from MineSweeper_ui import Ui_Form  # 这里导入你生成的 py 文件类
-from game import GameWindow  # 这里导入你自己编写的游戏类
+from MineSweeper_ui import Ui_Form
+from game import GameWindow
 class MineSweeperWindow(QWidget):
     def __init__(self):
         super().__init__()
         self.ui = Ui_Form()
-        self.ui.setupUi(self)  # 把 Ui_Form 里的控件加载到当前窗口
-
-        # 在这里绑定你的按钮事件等
+        self.ui.setupUi(self)
+        self.setWindowTitle("扫雷游戏——zyf")
+        #事件绑定
         self.ui.pushButton.clicked.connect(self.start_game)
         self.ui.radioButton.toggled.connect(self.updateLabel)
         self.ui.radioButton_2.toggled.connect(self.updateLabel)
         self.ui.radioButton_3.toggled.connect(self.updateLabel)
         self.ui.pushButton_2.clicked.connect(self.load_and_show_scores)
-
-        self.load_and_show_scores()
-        self.username = "未知用户"
+        #初始化
+        self.load_and_show_scores()#初始化排行榜
+        self.username = "未知用户"#初始化用户名
+        #默认配置参数
         self.rows = 8
         self.cols = 8
         self.mines = 10
         self.level = 0
 
+    #点击开始游戏按钮后，创建游戏窗口，并默认初始化用户名
     def start_game(self):
         self.username = self.ui.lineEdit.text().strip()
         if not self.username:
@@ -32,6 +32,7 @@ class MineSweeperWindow(QWidget):
         temp=GameWindow(self.username,self.rows,self.cols,self.mines,self.level)
         temp.show()
 
+    #选择难度并修改行列参数
     def updateLabel(self):
         if self.ui.radioButton.isChecked():
             print("选项1被选中了！")
@@ -70,7 +71,7 @@ class MineSweeperWindow(QWidget):
             print(self.cols)
             print(self.mines)
 
-
+    #排行榜读文件数据，并显示
     def load_and_show_scores(self):
         try:
             with open("scores.txt", "r", encoding="utf-8") as f:
