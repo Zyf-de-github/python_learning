@@ -1,4 +1,4 @@
-##这是一个基于python和qt编写的扫雷游戏
+# 这是一个基于python和qt编写的扫雷游戏
 
 项目目录结构：
 - MineSweeper/          # 主程序文件夹
