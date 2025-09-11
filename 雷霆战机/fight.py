@@ -1,11 +1,14 @@
 import sys
 import pygame
+from pygame.examples.midi import fill_region
+
 from setting import Settings
 from ship import Ship
 from bullet import Bullet
 from enemy import Enemy
 from explode import Explosion
 from button import Button
+from upgrade import Upgrade
 import random
 
 class Fight:
@@ -20,6 +23,8 @@ class Fight:
         self.bullets = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
+        self.upgrades = pygame.sprite.Group()
+        self.grade=self.settings.grade
         self.game_state=False
         self.life_times=self.settings.life_times
         self.play_button = Button(self, 'Play',200,50,self.settings.screen_width/2-100, self.settings.screen_height/2-25)
@@ -39,6 +44,7 @@ class Fight:
                 self.update_screen()
                 self.clean_up()
                 self.check_collisions()
+                self.check_upgrades()
                 self.explosions.update()
                 self.losing_game()
 
@@ -54,6 +60,8 @@ class Fight:
             explosion = Explosion(self.ship.rect.center, self)
             self.explosions.add(explosion)
             self.enemies.empty()
+            self.bullets.empty()
+            self.upgrades.empty()
             self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
             self.ship.__init__(self)
             if self.life_times < 0:
@@ -73,13 +81,24 @@ class Fight:
 
     def check_collisions(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
-
         # 为每个被击中的敌人创建爆炸效果
         for bullet, hit_enemies in collisions.items():
             for enemy in hit_enemies:
-                # 在敌人位置创建爆炸
                 explosion = Explosion(enemy.rect.center, self)
                 self.explosions.add(explosion)
+                if random.randint(1, 8) <= self.settings.probability:
+                    self.upgrade_ship(enemy.rect.center)
+
+    def check_upgrades(self):
+        collided_upgrades = pygame.sprite.spritecollide(self.ship, self.upgrades, True)
+        # 为每个被击中的敌人创建爆炸效果
+        for upgrades in collided_upgrades:
+            if self.grade<5:
+                self.grade += 1
+            else:
+                self.fire_bullet(True)
+
+
 
     def check_events(self):
         for event in pygame.event.get():
@@ -131,12 +150,32 @@ class Fight:
             new_enemy = Enemy(self)
             self.enemies.add(new_enemy)
 
+    def upgrade_ship(self,center):
+        new_upgrade = Upgrade(self,center)
+        self.upgrades.add(new_upgrade)
 
-    def fire_bullet(self):
+    def fire_bullet(self,flag=False):
         new_bullet = Bullet(self,0,0)
-        new_bullet_left = Bullet(self, -20,20)  # 向左偏移20像素
-        new_bullet_right = Bullet(self, 20,20)  # 向右偏移20像素
-        self.bullets.add(new_bullet, new_bullet_left, new_bullet_right)
+        self.bullets.add(new_bullet)
+        if self.grade >= 2:
+            new_bullet_back = Bullet(self, 0,40)  # 向左偏移20像素
+            self.bullets.add(new_bullet_back)
+        if self.grade >= 3:
+            new_bullet_left = Bullet(self, -10,10)  # 向左偏移20像素
+            self.bullets.add(new_bullet_left)
+            new_bullet_right = Bullet(self, 10,10)  # 向右偏移20像素
+            self.bullets.add(new_bullet_right)
+        if self.grade >= 4:
+            new_bullet_leftup = Bullet(self, -20,20,-0.2)  # 向左偏移20像素
+            self.bullets.add(new_bullet_leftup)
+            new_bullet_rightup = Bullet(self, 20,20,0.2)  # 向右偏移20像素
+            self.bullets.add(new_bullet_rightup)
+        if self.grade >= 5:
+            new_bullet_leftupup = Bullet(self, -25,25,-0.3)  # 向左偏移20像素
+            self.bullets.add(new_bullet_leftupup)
+            new_bullet_rightupup = Bullet(self, 25,25,0.3)  # 向右偏移20像素
+            self.bullets.add(new_bullet_rightupup)
+
 
     def update_screen(self):
         self.screen.fill(self.settings.bg_color)
@@ -150,6 +189,9 @@ class Fight:
             enemy.draw_enemy()
         for explosion in self.explosions.sprites():
             explosion.draw(self.screen)  # 使用自定义的draw方法
+        for upgrade in self.upgrades.sprites():
+            upgrade.update()
+            upgrade.blitme()
         pygame.display.flip()
 
 

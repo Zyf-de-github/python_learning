@@ -12,5 +12,8 @@ class Settings:
         self.bullet_color=(110, 20, 60)
         self.bullets_speed = 0.5
         self.enemy_speed=0.5
-        self.life_times=1
+        self.life_times=2
+        self.upgrade_speed=0.3
+        self.grade=1
+        self.probability=1
 
