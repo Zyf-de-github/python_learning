@@ -26,8 +26,6 @@ class Ship:
         self.moving_up = False
         self.moving_down = False
 
-        self.life_times = ai_game.settings.life_times
-
     def update(self):
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += self.settings.ship_speed

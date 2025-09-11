@@ -21,7 +21,9 @@ class Fight:
         self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.game_state=False
-        self.play_button = Button(self, 'Play')
+        self.life_times=self.settings.life_times
+        self.play_button = Button(self, 'Play',200,50,self.settings.screen_width/2-100, self.settings.screen_height/2-25)
+        self.live_button = Button(self, 'Lives:'+str(self.life_times),200,50,0,0)
         self.AUTO_FIRE_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.bullets_speed * 1000))  # 每 500 毫秒触发一次事件
 
@@ -43,7 +45,7 @@ class Fight:
 
     def losing_game(self):
         if pygame.sprite.spritecollideany(self.ship, self.enemies):
-            self.ship.life_times -= 1
+            self.life_times -= 1
             # print('Game Over')
             for enemy in self.enemies:
                 # 在敌人位置创建爆炸
@@ -52,8 +54,9 @@ class Fight:
             explosion = Explosion(self.ship.rect.center, self)
             self.explosions.add(explosion)
             self.enemies.empty()
+            self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
             self.ship.__init__(self)
-            if self.ship.life_times < 0:
+            if self.life_times < 0:
                 self.game_state=False
                 pygame.mouse.set_visible(True)
 
@@ -137,6 +140,7 @@ class Fight:
 
     def update_screen(self):
         self.screen.fill(self.settings.bg_color)
+        self.live_button.draw_button()
         if not self.game_state:
             self.play_button.draw_button()
         self.ship.blitme()

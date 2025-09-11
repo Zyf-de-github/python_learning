@@ -1,21 +1,21 @@
-import pygame.font
+import pygame
 
 class Button:
-    def __init__(self, ai_game, msg):
+    def __init__(self, ai_game, msg, width, height, x, y):
         self.screen = ai_game.screen
         self.screen_rect = self.screen.get_rect()
 
-        # Set the dimensions and properties of the button
-        self.width, self.height = 200, 50
+        # 按照传入参数设置尺寸
+        self.width, self.height = width, height
         self.button_color = (138, 29, 78)
         self.text_color = (255, 255, 255)
         self.font = pygame.font.SysFont(None, 48)
 
-        # Build the button's rect object and center it
+        # 创建按钮矩形，并设置到指定位置
         self.rect = pygame.Rect(0, 0, self.width, self.height)
-        self.rect.center = self.screen_rect.center
+        self.rect.topleft = (x, y)   # 用左上角定位
 
-        # The button message needs to be prepped only once
+        # 准备按钮文本
         self._prep_msg(msg)
 
     def _prep_msg(self, msg):
