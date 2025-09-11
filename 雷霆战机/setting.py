@@ -10,10 +10,15 @@ class Settings:
         self.bullet_width=4
         self.bullet_height=16
         self.bullet_color=(110, 20, 60)
-        self.bullets_speed = 0.5
+
+        self.bullets_speed = 1.2
+        self.super_bullets_speed = 0.35
+        self.super_fire_timer=4
+
         self.enemy_speed=0.5
         self.life_times=2
         self.upgrade_speed=0.3
+        self.upgrade_hit_times=2
         self.grade=1
         self.probability=1
 

@@ -18,6 +18,7 @@ class Fight:
         self.screen = pygame.display.set_mode((0,0),pygame.RESIZABLE)
         self.settings.screen_width=self.screen.get_width()
         self.settings.screen_height=self.screen.get_height()
+        self.bg_color = self.settings.bg_color
         pygame.display.set_caption('Fight')
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -29,9 +30,14 @@ class Fight:
         self.life_times=self.settings.life_times
         self.play_button = Button(self, 'Play',200,50,self.settings.screen_width/2-100, self.settings.screen_height/2-25)
         self.live_button = Button(self, 'Lives:'+str(self.life_times),200,50,0,0)
-        self.AUTO_FIRE_EVENT = pygame.USEREVENT + 1
-        pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.bullets_speed * 1000))  # 每 500 毫秒触发一次事件
 
+
+        self.AUTO_FIRE_EVENT = pygame.USEREVENT + 1
+        pygame.time.set_timer(self.AUTO_FIRE_EVENT, int( self.settings.bullets_speed * 1000))  # 每 500 毫秒触发一次事件
+
+
+        self.SUPER_SHOOTING_EVENT_STOP = pygame.USEREVENT + 2
+        pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, 0)  # 每 500 毫秒触发一次事件
 
     def run_game(self):
         while True:
@@ -52,6 +58,9 @@ class Fight:
     def losing_game(self):
         if pygame.sprite.spritecollideany(self.ship, self.enemies):
             self.life_times -= 1
+            self.grade -= 2
+            if self.grade < 1:
+                self.grade = 1
             # print('Game Over')
             for enemy in self.enemies:
                 # 在敌人位置创建爆炸
@@ -96,9 +105,9 @@ class Fight:
             if self.grade<5:
                 self.grade += 1
             else:
-                self.fire_bullet(True)
-
-
+                pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.super_bullets_speed*1000))
+                pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, int(self.settings.super_fire_timer * 1000))
+                self.bg_color = (255, 190, 190)
 
     def check_events(self):
         for event in pygame.event.get():
@@ -122,7 +131,10 @@ class Fight:
                 # 按键按下
                 if event.type == self.AUTO_FIRE_EVENT:
                     self.fire_bullet()
-
+                if event.type == self.SUPER_SHOOTING_EVENT_STOP:
+                    pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.bullets_speed * 1000))
+                    pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, 0)
+                    self.bg_color = self.settings.bg_color
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.ship.moving_left = True
@@ -154,7 +166,7 @@ class Fight:
         new_upgrade = Upgrade(self,center)
         self.upgrades.add(new_upgrade)
 
-    def fire_bullet(self,flag=False):
+    def fire_bullet(self):
         new_bullet = Bullet(self,0,0)
         self.bullets.add(new_bullet)
         if self.grade >= 2:
@@ -178,7 +190,7 @@ class Fight:
 
 
     def update_screen(self):
-        self.screen.fill(self.settings.bg_color)
+        self.screen.fill(self.bg_color)
         self.live_button.draw_button()
         if not self.game_state:
             self.play_button.draw_button()
@@ -190,6 +202,8 @@ class Fight:
         for explosion in self.explosions.sprites():
             explosion.draw(self.screen)  # 使用自定义的draw方法
         for upgrade in self.upgrades.sprites():
+            if upgrade.upgrade_hit_times > self.settings.upgrade_hit_times:
+                self.upgrades.remove(upgrade)
             upgrade.update()
             upgrade.blitme()
         pygame.display.flip()
