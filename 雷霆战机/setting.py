@@ -16,9 +16,17 @@ class Settings:
         self.super_fire_timer=4
 
         self.enemy_speed=0.5
+        self.enemy_probability=70  #1-10000
+        self.enemy_max_num=8
+
+
+        self.rocket_speed=0.3
+        self.rocket_probability=18  #1-10000
+        self.rocket_max_num=3
+
         self.life_times=2
         self.upgrade_speed=0.3
         self.upgrade_hit_times=2
         self.grade=1
-        self.probability=1
+        self.upgrade_probability=8 #6-30
 

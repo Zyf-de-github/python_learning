@@ -9,6 +9,7 @@ from enemy import Enemy
 from explode import Explosion
 from button import Button
 from upgrade import Upgrade
+from rocket import Rocket
 import random
 
 class Fight:
@@ -21,10 +22,13 @@ class Fight:
         self.bg_color = self.settings.bg_color
         pygame.display.set_caption('Fight')
         self.ship = Ship(self)
+
         self.bullets = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
+        self.rockets = pygame.sprite.Group()
+
         self.grade=self.settings.grade
         self.game_state=0   #0:开始界面 1:说明界面 2:游戏开始
         self.life_times=self.settings.life_times
@@ -61,11 +65,14 @@ class Fight:
                     self.bullets.update()
                     self.enemies_coming()
                     self.enemies.update()
+                    self.rockets_coming()
+                    self.rockets.update()
                 self.update_screen()
                 self.clean_up()
                 self.check_collisions()
                 self.check_upgrades()
                 self.explosions.update()
+                self.hit_rocket()
                 self.losing_game()
 
 
@@ -85,6 +92,29 @@ class Fight:
             self.enemies.empty()
             self.bullets.empty()
             self.upgrades.empty()
+            self.rockets.empty()
+            self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
+            self.ship.__init__(self)
+            if self.life_times < 0:
+                self.game_state=0
+                pygame.mouse.set_visible(True)
+
+    def hit_rocket(self):
+        if pygame.sprite.spritecollideany(self.ship, self.rockets):
+            self.life_times -= 1
+            self.grade -= 2
+            if self.grade < 1:
+                self.grade = 1
+            for rocket in self.rockets:
+                # 在敌人位置创建爆炸
+                explosion = Explosion(rocket.rect.center, self)
+                self.explosions.add(explosion)
+            explosion = Explosion(self.ship.rect.center, self)
+            self.explosions.add(explosion)
+            self.enemies.empty()
+            self.bullets.empty()
+            self.upgrades.empty()
+            self.rockets.empty()
             self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
             self.ship.__init__(self)
             if self.life_times < 0:
@@ -100,7 +130,10 @@ class Fight:
             for enemy in self.enemies.copy():
                 if enemy.rect.bottom >= self.settings.screen_height:
                     self.enemies.remove(enemy)
-            print('子弹数量:'+str(len(self.bullets))+' 敌机数量:'+str(len(self.enemies)))
+            for rocket in self.rockets.copy():
+                if rocket.rect.bottom >= self.settings.screen_height:
+                    self.rockets.remove(rocket)
+            # print('子弹数量:'+str(len(self.bullets))+' 敌机数量:'+str(len(self.enemies)))
 
     def check_collisions(self):
         collisions = pygame.sprite.groupcollide(self.bullets, self.enemies, True, True)
@@ -109,8 +142,10 @@ class Fight:
             for enemy in hit_enemies:
                 explosion = Explosion(enemy.rect.center, self)
                 self.explosions.add(explosion)
-                if random.randint(1, 8) <= self.settings.probability:
+                if random.randint(1, 30) <= self.settings.upgrade_probability - self.grade:
                     self.upgrade_ship(enemy.rect.center)
+
+
 
     def check_upgrades(self):
         collided_upgrades = pygame.sprite.spritecollide(self.ship, self.upgrades, True)
@@ -123,6 +158,7 @@ class Fight:
                 pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, int(self.settings.super_fire_timer * 1000))
                 self.bg_color = (255, 190, 190)
 
+
     def check_events(self):
         for event in pygame.event.get():
             # 退出游戏
@@ -134,6 +170,8 @@ class Fight:
                 mouse_pos = pygame.mouse.get_pos()
                 if self.game_state==0:
                     if self.play_button.rect.collidepoint(mouse_pos):
+                        self.life_times=self.settings.life_times
+                        self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
                         pygame.mouse.set_visible(False)
                         self.game_state = 2
                     if self.instruction_button.rect.collidepoint(mouse_pos):
@@ -178,9 +216,17 @@ class Fight:
 
     def enemies_coming(self):
         temp = random.randint(1, 30000)
-        if temp < 100:
+        if len(self.enemies)<self.settings.enemy_max_num and temp <= self.settings.enemy_probability:
             new_enemy = Enemy(self)
             self.enemies.add(new_enemy)
+
+    def rockets_coming(self):
+        temp = random.randint(1, 30000)
+        if len(self.rockets)<self.settings.rocket_max_num and temp <= self.settings.rocket_probability:
+            new_rocket = Rocket(self)
+            self.rockets.add(new_rocket)
+
+
 
     def upgrade_ship(self,center):
         new_upgrade = Upgrade(self,center)
@@ -243,6 +289,8 @@ class Fight:
                 bullet.draw_bullet()
             for enemy in self.enemies.sprites():
                 enemy.draw_enemy()
+            for rocket in self.rockets.sprites():
+                rocket.draw_rocket()
             for explosion in self.explosions.sprites():
                 explosion.draw(self.screen)  # 使用自定义的draw方法
             for upgrade in self.upgrades.sprites():
