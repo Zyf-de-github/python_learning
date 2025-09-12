@@ -102,7 +102,7 @@ class Fight:
         collided_upgrades = pygame.sprite.spritecollide(self.ship, self.upgrades, True)
         # 为每个被击中的敌人创建爆炸效果
         for upgrades in collided_upgrades:
-            if self.grade<5:
+            if self.grade<6:
                 self.grade += 1
             else:
                 pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.super_bullets_speed*1000))
@@ -170,23 +170,33 @@ class Fight:
         new_bullet = Bullet(self,0,0)
         self.bullets.add(new_bullet)
         if self.grade >= 2:
-            new_bullet_back = Bullet(self, 0,40)  # 向左偏移20像素
-            self.bullets.add(new_bullet_back)
+            new_bullet_left_0 = Bullet(self, -20,20,-0.1)  # 向左偏移20像素
+            self.bullets.add(new_bullet_left_0)
+            new_bullet_right_0 = Bullet(self, 20,20,0.1)  # 向右偏移20像素
+            self.bullets.add(new_bullet_right_0)
         if self.grade >= 3:
+            new_bullet_left_1 = Bullet(self, -25,25,-0.2)  # 向左偏移20像素
+            self.bullets.add(new_bullet_left_1)
+            new_bullet_right_1 = Bullet(self, 25,25,0.2)  # 向右偏移20像素
+            self.bullets.add(new_bullet_right_1)
+        if self.grade >= 4:
+            new_bullet_left_2 = Bullet(self, -30, 30, -0.3)  # 向左偏移20像素
+            self.bullets.add(new_bullet_left_2)
+            new_bullet_right_2 = Bullet(self, 30, 30, 0.3)  # 向右偏移20像素
+            self.bullets.add(new_bullet_right_2)
+        if self.grade >= 5:
             new_bullet_left = Bullet(self, -10,10)  # 向左偏移20像素
             self.bullets.add(new_bullet_left)
             new_bullet_right = Bullet(self, 10,10)  # 向右偏移20像素
             self.bullets.add(new_bullet_right)
-        if self.grade >= 4:
-            new_bullet_leftup = Bullet(self, -20,20,-0.2)  # 向左偏移20像素
-            self.bullets.add(new_bullet_leftup)
-            new_bullet_rightup = Bullet(self, 20,20,0.2)  # 向右偏移20像素
-            self.bullets.add(new_bullet_rightup)
-        if self.grade >= 5:
-            new_bullet_leftupup = Bullet(self, -25,25,-0.3)  # 向左偏移20像素
-            self.bullets.add(new_bullet_leftupup)
-            new_bullet_rightupup = Bullet(self, 25,25,0.3)  # 向右偏移20像素
-            self.bullets.add(new_bullet_rightupup)
+        if self.grade >= 6:
+            new_bullet_back = Bullet(self, 0,40)  # 向左偏移20像素
+            self.bullets.add(new_bullet_back)
+            new_bullet_left_back = Bullet(self, -10,40)  # 向左偏移20像素
+            self.bullets.add(new_bullet_left_back)
+            new_bullet_right_back = Bullet(self, 10,40)  # 向右偏移20像素
+            self.bullets.add(new_bullet_right_back)
+
 
 
     def update_screen(self):
