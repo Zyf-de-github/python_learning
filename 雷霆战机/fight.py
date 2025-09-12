@@ -26,11 +26,25 @@ class Fight:
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
         self.grade=self.settings.grade
-        self.game_state=False
+        self.game_state=0   #0:开始界面 1:说明界面 2:游戏开始
         self.life_times=self.settings.life_times
-        self.play_button = Button(self, 'Play',200,50,self.settings.screen_width/2-100, self.settings.screen_height/2-25)
+        self.play_button = Button(self, 'Play',200,70,self.settings.screen_width/2-100, self.settings.screen_height/2-125)
+        self.instruction_button = Button(self, 'instruction_button',400,70,self.settings.screen_width/2-200, self.settings.screen_height/2+25)
+        self.back_button = Button(self, 'Back',200,70,self.settings.screen_width/2-100, self.settings.screen_height-125)
         self.live_button = Button(self, 'Lives:'+str(self.life_times),200,50,0,0)
 
+        self.instructions = [
+            "Game Instructions",
+            "Controls:",
+            "  - Arrow  keys:  Move  the  spaceship",
+            "  - Auto-fire:  Shoots  bullets  at  intervals",
+            "Objective:",
+            "  - Collect  upgrades  to  enhance  firepower(up  to  level  6)",
+            "Tips:",
+            "  - Hitting  enemies  may  drop  upgrade  items",
+            "  - Colliding  with  enemies  reduces  life  and  lowers  two  levels",
+            "  - Game  ends  when  lives  reach  0"
+        ]
 
         self.AUTO_FIRE_EVENT = pygame.USEREVENT + 1
         pygame.time.set_timer(self.AUTO_FIRE_EVENT, int( self.settings.bullets_speed * 1000))  # 每 500 毫秒触发一次事件
@@ -42,7 +56,7 @@ class Fight:
     def run_game(self):
         while True:
                 self.check_events()
-                if self.game_state:
+                if self.game_state==2:
                     self.ship.update()
                     self.bullets.update()
                     self.enemies_coming()
@@ -74,7 +88,7 @@ class Fight:
             self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
             self.ship.__init__(self)
             if self.life_times < 0:
-                self.game_state=False
+                self.game_state=0
                 pygame.mouse.set_visible(True)
 
 
@@ -118,16 +132,22 @@ class Fight:
             # 鼠标点击开始按钮
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
-                if self.play_button.rect.collidepoint(mouse_pos):
-                    pygame.mouse.set_visible(False)
-                    self.game_state = True
+                if self.game_state==0:
+                    if self.play_button.rect.collidepoint(mouse_pos):
+                        pygame.mouse.set_visible(False)
+                        self.game_state = 2
+                    if self.instruction_button.rect.collidepoint(mouse_pos):
+                        self.game_state = 1
+                if self.game_state==1:
+                    if self.back_button.rect.collidepoint(mouse_pos):
+                        self.game_state = 0
 
             # 按键松开 0 退出
             elif event.type == pygame.KEYUP and event.key == pygame.K_0:
                 sys.exit()
 
             # 游戏进行中才响应键盘事件
-            if self.game_state:
+            if self.game_state==2:
                 # 按键按下
                 if event.type == self.AUTO_FIRE_EVENT:
                     self.fire_bullet()
@@ -202,20 +222,34 @@ class Fight:
     def update_screen(self):
         self.screen.fill(self.bg_color)
         self.live_button.draw_button()
-        if not self.game_state:
+        if self.game_state== 0:
             self.play_button.draw_button()
-        self.ship.blitme()
-        for bullet in self.bullets.sprites():
-            bullet.draw_bullet()
-        for enemy in self.enemies.sprites():
-            enemy.draw_enemy()
-        for explosion in self.explosions.sprites():
-            explosion.draw(self.screen)  # 使用自定义的draw方法
-        for upgrade in self.upgrades.sprites():
-            if upgrade.upgrade_hit_times > self.settings.upgrade_hit_times:
-                self.upgrades.remove(upgrade)
-            upgrade.update()
-            upgrade.blitme()
+            self.instruction_button.draw_button()
+        elif self.game_state == 1:
+            line_height = 40  # 每行间隔 40 像素
+            total_text_height = len(self.instructions) * line_height  # 总文本高度
+            start_y = (self.settings.screen_height - total_text_height) // 2  # 垂直居中的起始 y 坐标
+
+            for i, line in enumerate(self.instructions):
+                text_surface = pygame.font.Font(None, 28).render(line, True, (0, 0, 0))  # 黑色文本
+                text_rect = text_surface.get_rect()
+                text_rect.centerx = self.settings.screen_width // 2  # 水平居中
+                text_rect.y = start_y + i * line_height  # 每行间隔 40 像素
+                self.screen.blit(text_surface, text_rect)
+            self.back_button.draw_button()
+        elif self.game_state == 2:
+            self.ship.blitme()
+            for bullet in self.bullets.sprites():
+                bullet.draw_bullet()
+            for enemy in self.enemies.sprites():
+                enemy.draw_enemy()
+            for explosion in self.explosions.sprites():
+                explosion.draw(self.screen)  # 使用自定义的draw方法
+            for upgrade in self.upgrades.sprites():
+                if upgrade.upgrade_hit_times > self.settings.upgrade_hit_times:
+                    self.upgrades.remove(upgrade)
+                upgrade.update()
+                upgrade.blitme()
         pygame.display.flip()
 
 
