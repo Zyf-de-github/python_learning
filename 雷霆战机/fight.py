@@ -12,6 +12,7 @@ from button import Button
 from upgrade import Upgrade
 from rocket import Rocket
 from boss import Boss
+from boss_bullet import Boss_Bullet
 import random
 
 class Fight:
@@ -30,6 +31,8 @@ class Fight:
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
         self.rockets = pygame.sprite.Group()
+        self.boss_bullets = pygame.sprite.Group()
+
         self.enemy_probability=self.settings.enemy_probability
         self.remain_enemies=self.settings.remain_enemies
         self.grade=self.settings.grade
@@ -58,7 +61,10 @@ class Fight:
 
 
         self.SUPER_SHOOTING_EVENT_STOP = pygame.USEREVENT + 2
-        pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, 0)  # 每 500 毫秒触发一次事件
+        pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, 0)
+
+        self.BOSS_FIRE_EVENT = pygame.USEREVENT + 3
+        pygame.time.set_timer(self.BOSS_FIRE_EVENT, 0)  # 每 500 毫秒触发一次事件
 
     def run_game(self):
         while True:
@@ -72,7 +78,10 @@ class Fight:
                     self.rockets_coming()
                 if self.game_state==3:
                     self.hit_boss()
-                    self.boss.update()
+                    if self.boss is not None:
+                        self.boss_bullets.update()
+                        self.boss.update()
+                        self.boss_collisions()
                 self.update_screen()
                 self.clean_up()
                 self.check_collisions()
@@ -128,15 +137,38 @@ class Fight:
                 pygame.mouse.set_visible(True)
 
     def hit_boss(self):
-        boss_collisions = pygame.sprite.spritecollide(self.boss, self.bullets, True)  # 获取碰撞的子弹
-        for bullet in boss_collisions:  # 只处理实际碰撞的子弹
-            self.boss.boss_blood -= 1  # 每颗子弹减少10血
-            explosion = Explosion(bullet.rect.center, self,0.3)  # 子弹命中位置爆炸
-            self.explosions.add(explosion)
+        if self.boss is not None:
+            boss_collisions = pygame.sprite.spritecollide(self.boss, self.bullets, True)  # 获取碰撞的子弹
+            for bullet in boss_collisions:  # 只处理实际碰撞的子弹
+                self.boss.boss_blood -= 1
+                explosion = Explosion(bullet.rect.center, self,0.3)  # 子弹命中位置爆炸
+                self.explosions.add(explosion)
             if self.boss.boss_blood <= 0:
                 explosion = Explosion(self.boss.rect.center, self,3)  # Boss死亡时大爆炸
                 self.explosions.add(explosion)
                 self.game_state=2
+                self.boss=None
+                pygame.time.set_timer(self.BOSS_FIRE_EVENT, 0)  # 每 500 毫秒触发一次事件
+
+    def boss_collisions(self):
+        if self.game_state == 3 and self.boss:
+            # 飞船与Boss碰撞
+            boss_bullet_collisions = pygame.sprite.spritecollide(self.ship, self.boss_bullets, True)
+            if pygame.sprite.collide_rect(self.ship, self.boss) or boss_bullet_collisions:
+                self.life_times -= 1
+                self.grade = max(1, self.grade - 2)
+                explosion = Explosion(self.ship.rect.center, self, scale=1)
+                self.explosions.add(explosion)
+                self.enemies.empty()
+                self.bullets.empty()
+                self.upgrades.empty()
+                self.rockets.empty()
+                self.live_button = Button(self, 'Lives:' + str(self.life_times), 200, 50, 0, 0)
+                self.ship.__init__(self)
+                if self.life_times < 0:
+                    self.game_state = 0
+                    pygame.mouse.set_visible(True)
+
 
     def clean_up(self):
             for bullet in self.bullets.copy():
@@ -206,6 +238,9 @@ class Fight:
                     pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.bullets_speed * 1000))
                     pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, 0)
                     self.bg_color = self.settings.bg_color
+                if self.game_state==3 and self.boss and event.type ==self.BOSS_FIRE_EVENT:
+                    self.boss_fire_bullet()
+
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         self.ship.moving_left = True
@@ -239,6 +274,8 @@ class Fight:
                 self.boss = Boss(self)
                 self.enemy_probability=self.settings.enemy_probability/2
                 self.remain_enemies=self.settings.remain_enemies
+                pygame.time.set_timer(self.BOSS_FIRE_EVENT, int(self.settings.boss_fire_speed*1000))  # 每 500 毫秒触发一次事件
+
 
     def rockets_coming(self):
         temp = random.randint(1, 30000)
@@ -249,6 +286,14 @@ class Fight:
     def upgrade_ship(self,center):
         new_upgrade = Upgrade(self,center)
         self.upgrades.add(new_upgrade)
+
+    def boss_fire_bullet(self):
+        new_boss_bullet = Boss_Bullet(self, 0, 0)
+        self.boss_bullets.add(new_boss_bullet)
+        new_boss_bullet = Boss_Bullet(self, -20, -10,-0.3)
+        self.boss_bullets.add(new_boss_bullet)
+        new_boss_bullet = Boss_Bullet(self, 20, -10,0.3)
+        self.boss_bullets.add(new_boss_bullet)
 
     def fire_bullet(self):
         new_bullet = Bullet(self,0,0)
@@ -315,7 +360,9 @@ class Fight:
                     self.upgrades.remove(upgrade)
                 upgrade.update()
                 upgrade.blitme()
-            if self.game_state == 3:
+            if self.game_state == 3 and self.boss is not None:
+                for boss_bullet in self.boss_bullets.sprites():
+                    boss_bullet.draw_bullet()
                 self.boss.update()
                 self.boss.draw_boss()
 
