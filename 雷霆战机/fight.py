@@ -2,6 +2,7 @@ import sys
 import pygame
 from pygame.examples.midi import fill_region
 
+import boss
 from setting import Settings
 from ship import Ship
 from bullet import Bullet
@@ -10,6 +11,7 @@ from explode import Explosion
 from button import Button
 from upgrade import Upgrade
 from rocket import Rocket
+from boss import Boss
 import random
 
 class Fight:
@@ -22,15 +24,16 @@ class Fight:
         self.bg_color = self.settings.bg_color
         pygame.display.set_caption('Fight')
         self.ship = Ship(self)
-
+        self.boss = None
         self.bullets = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.upgrades = pygame.sprite.Group()
         self.rockets = pygame.sprite.Group()
-
+        self.enemy_probability=self.settings.enemy_probability
+        self.remain_enemies=self.settings.remain_enemies
         self.grade=self.settings.grade
-        self.game_state=0   #0:开始界面 1:说明界面 2:游戏开始
+        self.game_state=0   #0:开始界面 1:说明界面 2:游戏开始 3:boss战
         self.life_times=self.settings.life_times
         self.play_button = Button(self, 'Play',200,70,self.settings.screen_width/2-100, self.settings.screen_height/2-125)
         self.instruction_button = Button(self, 'instruction_button',400,70,self.settings.screen_width/2-200, self.settings.screen_height/2+25)
@@ -60,13 +63,16 @@ class Fight:
     def run_game(self):
         while True:
                 self.check_events()
-                if self.game_state==2:
+                if self.game_state>=2:
                     self.ship.update()
                     self.bullets.update()
-                    self.enemies_coming()
                     self.enemies.update()
-                    self.rockets_coming()
                     self.rockets.update()
+                    self.enemies_coming()
+                    self.rockets_coming()
+                if self.game_state==3:
+                    self.hit_boss()
+                    self.boss.update()
                 self.update_screen()
                 self.clean_up()
                 self.check_collisions()
@@ -121,7 +127,16 @@ class Fight:
                 self.game_state=0
                 pygame.mouse.set_visible(True)
 
-
+    def hit_boss(self):
+        boss_collisions = pygame.sprite.spritecollide(self.boss, self.bullets, True)  # 获取碰撞的子弹
+        for bullet in boss_collisions:  # 只处理实际碰撞的子弹
+            self.boss.boss_blood -= 1  # 每颗子弹减少10血
+            explosion = Explosion(bullet.rect.center, self,0.3)  # 子弹命中位置爆炸
+            self.explosions.add(explosion)
+            if self.boss.boss_blood <= 0:
+                explosion = Explosion(self.boss.rect.center, self,3)  # Boss死亡时大爆炸
+                self.explosions.add(explosion)
+                self.game_state=2
 
     def clean_up(self):
             for bullet in self.bullets.copy():
@@ -146,7 +161,6 @@ class Fight:
                     self.upgrade_ship(enemy.rect.center)
 
 
-
     def check_upgrades(self):
         collided_upgrades = pygame.sprite.spritecollide(self.ship, self.upgrades, True)
         # 为每个被击中的敌人创建爆炸效果
@@ -157,7 +171,6 @@ class Fight:
                 pygame.time.set_timer(self.AUTO_FIRE_EVENT, int(self.settings.super_bullets_speed*1000))
                 pygame.time.set_timer(self.SUPER_SHOOTING_EVENT_STOP, int(self.settings.super_fire_timer * 1000))
                 self.bg_color = (255, 190, 190)
-
 
     def check_events(self):
         for event in pygame.event.get():
@@ -185,7 +198,7 @@ class Fight:
                 sys.exit()
 
             # 游戏进行中才响应键盘事件
-            if self.game_state==2:
+            if self.game_state>=2:
                 # 按键按下
                 if event.type == self.AUTO_FIRE_EVENT:
                     self.fire_bullet()
@@ -216,17 +229,22 @@ class Fight:
 
     def enemies_coming(self):
         temp = random.randint(1, 30000)
-        if len(self.enemies)<self.settings.enemy_max_num and temp <= self.settings.enemy_probability:
+        if len(self.enemies)<self.settings.enemy_max_num and temp <= self.enemy_probability:
             new_enemy = Enemy(self)
             self.enemies.add(new_enemy)
+            if self.game_state!=3:
+                self.remain_enemies-=1
+            if self.remain_enemies==0:
+                self.game_state = 3
+                self.boss = Boss(self)
+                self.enemy_probability=self.settings.enemy_probability/2
+                self.remain_enemies=self.settings.remain_enemies
 
     def rockets_coming(self):
         temp = random.randint(1, 30000)
         if len(self.rockets)<self.settings.rocket_max_num and temp <= self.settings.rocket_probability:
             new_rocket = Rocket(self)
             self.rockets.add(new_rocket)
-
-
 
     def upgrade_ship(self,center):
         new_upgrade = Upgrade(self,center)
@@ -264,7 +282,6 @@ class Fight:
             self.bullets.add(new_bullet_right_back)
 
 
-
     def update_screen(self):
         self.screen.fill(self.bg_color)
         self.live_button.draw_button()
@@ -283,7 +300,7 @@ class Fight:
                 text_rect.y = start_y + i * line_height  # 每行间隔 40 像素
                 self.screen.blit(text_surface, text_rect)
             self.back_button.draw_button()
-        elif self.game_state == 2:
+        elif self.game_state >= 2 :
             self.ship.blitme()
             for bullet in self.bullets.sprites():
                 bullet.draw_bullet()
@@ -298,6 +315,10 @@ class Fight:
                     self.upgrades.remove(upgrade)
                 upgrade.update()
                 upgrade.blitme()
+            if self.game_state == 3:
+                self.boss.update()
+                self.boss.draw_boss()
+
         pygame.display.flip()
 
 

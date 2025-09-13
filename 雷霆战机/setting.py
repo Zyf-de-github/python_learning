@@ -6,9 +6,10 @@ class Settings:
         self.screen_height = 800
         self.ship_speed=0.6
         self.bg_color = (230, 230, 230)
-        self.bullet_speed=2
-        self.bullet_width=4
-        self.bullet_height=16
+
+        self.bullet_speed=2.15
+        self.bullet_width=6
+        self.bullet_height=25
         self.bullet_color=(110, 20, 60)
 
         self.bullets_speed = 1.2
@@ -19,14 +20,17 @@ class Settings:
         self.enemy_probability=70  #1-10000
         self.enemy_max_num=8
 
-
+        self.remain_enemies=10     #还有x个敌人就会出现boss
         self.rocket_speed=0.3
-        self.rocket_probability=18  #1-10000
+        self.rocket_probability=12  #1-10000
         self.rocket_max_num=3
+
+        self.boss_speed=0.2
+        self.boss_blood=50
 
         self.life_times=2
         self.upgrade_speed=0.3
         self.upgrade_hit_times=2
-        self.grade=1
-        self.upgrade_probability=8 #6-30
+        self.grade=6
+        self.upgrade_probability=9 #6-30
 

@@ -11,7 +11,7 @@ class Upgrade(Sprite):
 
         self.image = pygame.image.load('images/upgrade.png').convert_alpha()
 
-        scale = 0.125  # 缩小到 50%，你可以改成 0.25, 0.75, 2.0 等
+        scale = 0.25  # 缩小到 50%，你可以改成 0.25, 0.75, 2.0 等
         w, h = self.image.get_size()
         new_size = (int(w * scale), int(h * scale))
         self.image = pygame.transform.smoothscale(self.image, new_size)

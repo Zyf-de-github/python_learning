@@ -4,10 +4,11 @@ from pygame.sprite import Sprite
 
 
 class Explosion(Sprite):
-    def __init__(self, center, ai_game):
+    def __init__(self, center, ai_game, scale=1):
         super().__init__()
         self.screen = ai_game.screen
         self.settings = ai_game.settings
+        self.scale = scale  # 缩放比例，默认1
 
         # 生成爆炸动画帧
         self.frames = self.generate_explosion_frames()
@@ -22,14 +23,15 @@ class Explosion(Sprite):
         self.last_update = pygame.time.get_ticks()
         self.frame_rate = 60  # 每帧显示60毫秒
 
-        # 爆炸粒子效果（可选）
+        # 爆炸粒子效果
         self.particles = self.create_particles(center)
 
     def generate_explosion_frames(self):
         """程序生成爆炸动画帧"""
         frames = []
         # 定义爆炸的大小和颜色变化序列
-        sizes = [15, 30, 45, 60, 75, 90, 75, 60, 45, 30, 15]  # 大小变化
+        base_sizes = [15, 30, 45, 60, 75, 90, 75, 60, 45, 30, 15]  # 基础大小
+        sizes = [size * self.scale for size in base_sizes]  # 应用缩放
         colors = [
             (255, 255, 200),  # 亮黄色
             (255, 220, 100),  # 橙黄色
@@ -45,30 +47,30 @@ class Explosion(Sprite):
         ]
 
         for i, (size, color) in enumerate(zip(sizes, colors)):
-            # 创建透明表面
-            surface = pygame.Surface((size * 2 + 20, size * 2 + 20), pygame.SRCALPHA)
+            # 创建透明表面，尺寸随缩放调整
+            surface = pygame.Surface((size * 2 + 20 * self.scale, size * 2 + 20 * self.scale), pygame.SRCALPHA)
 
             # 绘制主爆炸圆形
-            pygame.draw.circle(surface, (*color, 220), (size + 10, size + 10), size)
+            pygame.draw.circle(surface, (*color, 220), (size + 10 * self.scale, size + 10 * self.scale), size)
 
             # 添加光晕效果
             if i < 6:  # 前半段动画有光晕
-                glow_size = size + 10
+                glow_size = size + 10 * self.scale
                 for alpha in range(100, 30, -20):
                     pygame.draw.circle(surface, (255, 200, 100, alpha),
-                                       (size + 10, size + 10), glow_size, 2)
-                    glow_size -= 3
+                                       (size + 10 * self.scale, size + 10 * self.scale), glow_size, 2)
+                    glow_size -= 3 * self.scale
 
             # 添加随机火花效果
             if i < 8:  # 前8帧有火花
-                for _ in range(size // 3):
+                for _ in range(int(size // 3)):
                     angle = random.uniform(0, 6.28)
-                    distance = random.randint(size // 2, size)
-                    x = size + 10 + distance * pygame.math.Vector2(1, 0).rotate(angle * 57.3).x
-                    y = size + 10 + distance * pygame.math.Vector2(1, 0).rotate(angle * 57.3).y
-                    spark_size = random.randint(2, 6)
+                    distance = random.randint(int(size // 2), int(size))
+                    x = size + 10 * self.scale + distance * pygame.math.Vector2(1, 0).rotate(angle * 57.3).x
+                    y = size + 10 * self.scale + distance * pygame.math.Vector2(1, 0).rotate(angle * 57.3).y
+                    spark_size = random.randint(2, 6) * self.scale
                     spark_color = (255, 255, 200, random.randint(150, 220))
-                    pygame.draw.circle(surface, spark_color, (int(x), int(y)), spark_size)
+                    pygame.draw.circle(surface, spark_color, (int(x), int(y)), int(spark_size))
 
             frames.append(surface)
 
@@ -79,8 +81,8 @@ class Explosion(Sprite):
         particles = []
         for _ in range(20):
             angle = random.uniform(0, 6.28)
-            speed = random.uniform(2, 8)
-            size = random.randint(2, 6)
+            speed = random.uniform(2, 8) * self.scale  # 速度随缩放调整
+            size = random.randint(2, 6) * self.scale  # 粒子大小随缩放调整
             lifetime = random.randint(20, 40)
             color = random.choice([
                 (255, 255, 200), (255, 200, 100),
@@ -137,4 +139,4 @@ class Explosion(Sprite):
             alpha = 255 * (1 - particle['age'] / particle['lifetime'])
             color = (*particle['color'], int(alpha))
             pos = (int(particle['pos'][0]), int(particle['pos'][1]))
-            pygame.draw.circle(screen, color, pos, particle['size'])
+            pygame.draw.circle(screen, color, pos, int(particle['size']))
