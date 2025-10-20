@@ -1,3 +1,10 @@
+
+
+#@-----------------------------
+#@     鸢尾花剪枝
+#@     展示剪枝算法的分类决策树可视化
+#@-----------------------------
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

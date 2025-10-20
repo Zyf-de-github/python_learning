@@ -1,14 +1,20 @@
-#家庭收入、性别编码、蛋白质、运动时间对 身高的影响
+
+
+#@----------------------------------------------------------
+#@              身高的影响
+#@              展示一个正常的决策树分类模型的可视化过程
+#@----------------------------------------------------------
 
 import pandas as pd
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor, plot_tree
 import matplotlib.pyplot as plt
-
 from matplotlib import font_manager
 
 plt.rcParams['font.sans-serif'] = ['SimHei']        # 使用黑体显示中文
 plt.rcParams['axes.unicode_minus'] = False          # 正常显示负号
+
+
 # ====== 1. 构造模拟数据集 ======
 np.random.seed(0)
 
@@ -35,7 +41,7 @@ df['身高'] = (
 X = df[['家庭收入', '性别编码', '蛋白质', '运动时间']]
 y = df['身高']
 
-model = DecisionTreeRegressor(max_depth=4, random_state=0,criterion="criterion")
+model = DecisionTreeRegressor(max_depth=3, random_state=0)
 model.fit(X, y)
 
 # ====== 4. 输出特征重要性 ======
@@ -45,7 +51,7 @@ for k, v in importance.items():
     print(f"{k:10s}  {v:.3f}")
 
 # ====== 5. 可视化决策树 ======
-plt.figure(figsize=(20, 12), dpi=200)
+plt.figure(figsize=(20, 15))
 plot_tree(model, feature_names=X.columns, filled=True, rounded=True)
 plt.title("高中生身高影响因素决策树（模拟数据）", fontsize=14)
 plt.show()
