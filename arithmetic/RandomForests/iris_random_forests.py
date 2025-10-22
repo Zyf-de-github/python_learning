@@ -11,22 +11,16 @@ from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import plot_tree
 
-# =============================
-# 1. 设置中文字体
-# =============================
+
 plt.rcParams['font.sans-serif'] = ['SimHei']        # 使用黑体显示中文
 plt.rcParams['axes.unicode_minus'] = False          # 正常显示负号
 
-# =============================
-# 2. 加载数据并替换中文标签
-# =============================
+
 iris = load_iris()
 iris.feature_names = ['花萼长度 (cm)', '花萼宽度 (cm)', '花瓣长度 (cm)', '花瓣宽度 (cm)']
 iris.target_names = ['山鸢尾', '变色鸢尾', '维吉尼亚鸢尾']
 
-# =============================
-# 3. 随机森林分类模型训练
-# =============================
+
 forest = RandomForestClassifier(
     n_estimators=10,         # 森林中树的数量
     random_state=0,
@@ -34,9 +28,6 @@ forest = RandomForestClassifier(
 )
 forest.fit(iris.data, iris.target)
 
-# =============================
-# 4. 绘制某两个特征的决策边界
-# =============================
 pair = [2, 3]   # 花瓣长度 vs 花瓣宽度
 X = iris.data[:, pair]
 y = iris.target
@@ -64,11 +55,7 @@ plt.title("随机森林在花瓣长度/宽度特征对的决策边界")
 plt.legend()
 plt.show()
 
-# =============================
-# 5. 展示森林中三棵树的具体结构
-# =============================
 
-# 从森林中取出三棵树（每棵树是一个 DecisionTreeClassifier 对象）
 estimators = forest.estimators_[:3]
 
 plt.figure(figsize=(18, 16))
@@ -86,9 +73,7 @@ for i, tree in enumerate(estimators):
 plt.tight_layout()
 plt.show()
 
-# =============================
-# 6. 输出三棵树的简单信息
-# =============================
+
 for i, tree in enumerate(estimators):
     print(f"\n第 {i+1} 棵树的信息：")
     print(f"节点数量：{tree.tree_.node_count}")
